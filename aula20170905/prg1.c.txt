@@ -1,0 +1,18 @@
+#include <stdio.h>
+
+int main ()
+{
+int X, Y, resu;
+printf("Digite um numero");
+scanf("%d", &X);
+scanf("%d", &Y);
+resu = X + Y;
+printf("A soma e %d \n", resu);
+resu = X - Y;
+printf("A subtracao e %d \n", resu);
+resu = X*Y;
+printf("A multiplicacao e %d \n", resu);
+resu = X/Y;
+printf("A  divisao e %d \n", resu);
+return 0;
+}
