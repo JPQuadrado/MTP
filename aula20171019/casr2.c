@@ -8,7 +8,7 @@ int arte (int l, int c)
 	int ale, i = 0, j = 0, g;
 	char caracteres[] = ": $ # $ : 4 b . ' :. : $ # $: 4b. ':.", artes[l][c];
 	g = strlen(caracteres);
-	for(i; i < l; i++);
+	for(i; i < l; i++)
 	{
 		for(j = 0; j < c; j++)
 		{
@@ -19,6 +19,7 @@ int arte (int l, int c)
 		printf("\n");
 	}	
 	printf("\n");
+	return 0;
 }
 int main ()
 {
