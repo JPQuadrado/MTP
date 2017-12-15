@@ -5,10 +5,10 @@ typedef struct tipo_cliente
 	{
 	char nome[100];
 	int idade;
-	char RG[10]; //Com letra porem sem '-' e sem '.'
-	char CPF[11]; // sem o '-'
+	char RG[11]; //Com letra porem sem '-' e sem '.'
+	char CPF[12]; // sem o '-'
 	char usuario[20];
-	char senha[4];
+	char senha[5];
 	float saldo;
 	}cliente;
 int criar_conta ()
@@ -83,10 +83,6 @@ int mostrar_saldo()
 	printf("\n DIGITE O SEU USUARIO : \n");
 	scanf("%s", usi);
 	arq = fopen(usi,"rb");
-	if(arq == NULL)
-	{
-		printf("\n CONTA NAO ENCONTRADA \n");
-	}
 	fread(&cli,sizeof(cliente),1,arq);
 	printf("\n %s : O SEU SALDO E DE : %lf REAIS \n", cli.usuario, cli.saldo);
 	fclose(arq);
@@ -103,15 +99,14 @@ int inserir_din()
 	scanf("%s", u);
 	printf("\n DIGITE O VALOR A SER DEPOSITADO: \n");
 	scanf("%f", &valor);
-	p = fopen(u,"r+b");
-	if(p == NULL)
+	if(fopen(u,"rb") != 0)//SE FOSSE W DIRETO ELE IRIA CRIAR UM DO ZERO
 	{
-		printf("\n CONTA NAO ENCONTRADA \n");
+		p = fopen(u,"wb");
+		fread(&cli,sizeof(cliente),1,p);
+		cli.saldo = cli.saldo + valor;
+		fwrite(&cli,sizeof(cliente),1,p);
+		fclose(p);	
 	}
-	fread(&cli,sizeof(cliente),1,p);
-	cli.saldo = cli.saldo + valor;
-	fwrite(&cli,sizeof(cliente),1,p);
-	fclose(p);	
 	return 0;
 }
 int retirar_din()
@@ -125,19 +120,47 @@ int retirar_din()
 	scanf("%s", u);
 	printf("\n DIGITE O VALOR A SER DEPOSITADO: \n");
 	scanf("%f", &valor);
-	p = fopen(u,"r+b");
-	if(p == NULL)
+	if(fopen(u,"rb") != 0) //SE FOSSE W DIRETO ELE IRIA CRIAR UM DO ZERO
 	{
-		printf("\n CONTA NAO ENCONTRADA \n");
-	}
-	fread(&cli,sizeof(cliente),1,p);
-	cli.saldo = cli.saldo - valor;
-	if(cli.saldo < 0)
+		p = fopen(u,"wb");
+		fread(&cli,sizeof(cliente),1,p);
+		cli.saldo = cli.saldo - valor;
+		if(cli.saldo < 0)
+		{
+			printf("\n ESSA TRANSAÇÃO NÃO PODE SER EFETUADA \n");
+			return 0;
+		}
+		fwrite(&cli,sizeof(cliente),1,p);
+		fclose(p);	
+	}	
+	return 0;
+}
+int remove_conta()
+{
+	int i = 3;
+	FILE * op;
+	cliente L;
+	char usi[20], senha[5];
+	printf("\n DIGITE SEU USUARIO \n");
+	scanf("%s", usi);
+	if(fopen(usi,"r") != NULL)
 	{
-		printf("\n ESSA TRANSAÇÃO NÃO PODE SER EFETUADA \n");
-		return 0;
+		op = fopen(usi,"r");
+		fread(&L,sizeof(cliente),1,op);
+		fclose(op);
+		while(i != 0)
+		{
+			printf("\n PARA DELETAR SUA CONTA, DIGITE A SENHA: (%d  TENTATIVAS) \n", i);
+			scanf("%s", senha);
+			if(strcmp(senha,L.senha) == 0)
+			{
+				i = 0;
+				remove(usi);
+				printf("\n CONTA REMOVIDA \n");
+			}
+			else
+				i--;
+		}	
 	}
-	fwrite(&cli,sizeof(cliente),1,p);
-	fclose(p);	
 	return 0;
 }
