@@ -19,82 +19,65 @@ int criar_conta ()
 	cli.saldo = 0;
 	printf("\n SIGA AS INSTRUÇOES \n");
 	printf("\n DIGITE SEU NOME : \n");
-	scanf("%s",cli.nome);
+	scanf("%s", cli.nome);
 	printf("\n DIGITE SUA IDADE : \n");
 	scanf("%d",&cli.idade);
 	if(cli.idade < 18)
 	{
 		printf("\n VOCE NAO POSSUI IDADE SUFICIENTE PARA CRIAR UMA CONTA \n");
-		return 0;
+		return 2;
 	}
 	printf("\n DIGITE SEU RG (APENAS AS PRIMEIRAS LETRAS E OS NUMEROS) (MAXIMO DE 10 CARACTERES) : \n");
 	scanf("%s",cli.RG);
 	if(strlen(cli.RG) > 10)
 	{
 		printf("\n ULTRAPASSOU O LIMITE \n");
-		return 0;
+		return 2;
 	}
 	printf("\n DIGITE SEU CPF (APENAS NUMEROS) (MAXIMO DE 11 CARACTERES) : \n");
 	scanf("%s",cli.CPF);
 	if(strlen(cli.CPF) > 11)
 	{
 		printf("\n ULTRAPASSOU O LIMITE \n");
-		return 0;
+		return 2;
 	}
 	printf("\n DIGITE SEU USUARIO (MAXIMO DE 20 CARACTERES) : \n");
 	scanf("%s",cli.usuario);
 	if(strlen(cli.usuario) > 20)
 	{
 		printf("\n ULTRAPASSOU O LIMITE \n");
-		return 0;
+		return 2;
 	}
 	printf("\n DIGITE SUA SENHA (4 CARACTERES): \n");
 	scanf("%s",cli.senha);
 	if(strlen(cli.senha) > 4)
 	{
 		printf("\n ULTRAPASSOU O LIMITE \n");
-		return 0;
+		return 2;
 	}
 	conta = fopen(cli.usuario ,"wb");
-	fwrite(cli.nome, sizeof(char), sizeof(cli.nome),conta);
-	fwrite(cli.idade, sizeof(int), sizeof(cli.idade),conta);
-	fwrite(cli.RG, sizeof(char), sizeof(cli.RG),conta);
-	fwrite(cli.CPF, sizeof(char), sizeof(cli.CPF),conta);
-	fwrite(cli.usuario, sizeof(char), sizeof(cli.usuario),conta);
-	fwrite(cli.senha, sizeof(char), sizeof(cli.senha),conta);
-	fwrite(cli.saldo, sizeof(float), sizeof(cli.saldo),conta);
+	fwrite(&cli, sizeof(cliente),1,conta);
 	fclose(conta);
 	return 0;
 }
 int mostrar_conta()
 {
+	char us[20];
 	FILE * op;
-	int id;
-	char us[20],n[100],r[10],c[11];
+	cliente k;
 	printf("\n BEM VINDO AO MINIBANC \n");
 	printf("\n DIGITE O SEU USUARIO : \n");
 	scanf("%s", us);
 	op = fopen(us,"rb");
-	if(op = NULL)
-	{
-		printf("\n CONTA NAO ENCONTRADA \n");
-	}
-	fseek(op, 0, SEEK_SET);
-	fread(n,sizeof(char),100,op);
-	fseek(op,100*sizeof(char),SEEK_SET);
-	fread(id,sizeof(int),1,op);
-	fseek(op,sizeof(int),SEEK_CUR);
-	fread(r,sizeof(char),10,op);
-	fseek(op,10*sizeof(char),SEEK_CUR);
-	fread(c,sizeof(char),11,op);
-	printf("\n NOME : %s \n IDADE: %d \n RG: %s \n CPF: %s \n", n, id,r,c); 
+	fread(&k,sizeof(cliente),1,op);
+	printf("\n NOME : %s \n IDADE: %d \n RG: %s \n CPF: %s \n", k.nome,k.idade,k.RG,k.CPF); 
 	fclose(op);
 	return 0;
 }
 int mostrar_saldo()
 {
 	FILE * arq;
-	float sal;
+	cliente cli;
 	char usi[20];
 	printf("\n BEM VINDO AO MINIBANC \n");
 	printf("\n DIGITE O SEU USUARIO : \n");
@@ -104,59 +87,57 @@ int mostrar_saldo()
 	{
 		printf("\n CONTA NAO ENCONTRADA \n");
 	}
-	fseek(arq,(-(sizeof(float))),SEEK_END);
-	fread(sal,sizeof(float),1,arq);
-	printf("\n %s : O SEU SALDO E DE : %lf REAIS \n", usi, sal);
+	fread(&cli,sizeof(cliente),1,arq);
+	printf("\n %s : O SEU SALDO E DE : %lf REAIS \n", cli.usuario, cli.saldo);
 	fclose(arq);
 	return 0;
 }
 int inserir_din()
 {
 	FILE * p;
-	float valor, s;
+	cliente cli;
+	float valor;
 	char u[20];
 	printf("\n BEM VINDO AO MINIBANC \n");
 	printf("\n DIGITE O SEU USUARIO : \n");
 	scanf("%s", u);
 	printf("\n DIGITE O VALOR A SER DEPOSITADO: \n");
-	scanf("%lf", &valor);
+	scanf("%f", &valor);
 	p = fopen(u,"r+b");
 	if(p == NULL)
 	{
 		printf("\n CONTA NAO ENCONTRADA \n");
 	}
-	fseek(p,(-(sizeof(float))),SEEK_END);
-	fread(s,sizeof(float),1,p);
-	s = s + valor;
-	fwrite(s,sizeof(float),1,p);
+	fread(&cli,sizeof(cliente),1,p);
+	cli.saldo = cli.saldo + valor;
+	fwrite(&cli,sizeof(cliente),1,p);
 	fclose(p);	
 	return 0;
 }
 int retirar_din()
 {
 	FILE * p;
-	double valor, s;
+	cliente cli;
+	float valor;
 	char u[20];
 	printf("\n BEM VINDO AO MINIBANC \n");
 	printf("\n DIGITE O SEU USUARIO : \n");
 	scanf("%s", u);
 	printf("\n DIGITE O VALOR A SER DEPOSITADO: \n");
-	scanf("%lf", &valor);
+	scanf("%f", &valor);
 	p = fopen(u,"r+b");
 	if(p == NULL)
 	{
 		printf("\n CONTA NAO ENCONTRADA \n");
 	}
-	fseek(p,(-(sizeof(float))),SEEK_END);
-	fread(s,sizeof(float),1,p);
-	s = s - valor;
-	if(s < 0)
+	fread(&cli,sizeof(cliente),1,p);
+	cli.saldo = cli.saldo - valor;
+	if(cli.saldo < 0)
 	{
-		printf("\n A QUANTIA DE RETIRADA ULTRAPASSA SEU SALDO \n");
-		fclose(p);
+		printf("\n ESSA TRANSAÇÃO NÃO PODE SER EFETUADA \n");
 		return 0;
 	}
-	fwrite(s,sizeof(float),1,p);
+	fwrite(&cli,sizeof(cliente),1,p);
 	fclose(p);	
 	return 0;
 }

@@ -16,7 +16,7 @@ int main ()
 				K = criar_conta();
 				if(K = 0)
 					printf("\n CONTA CRIADA COM SUCESSO \n");
-				else
+				if(K != 0)
 					printf("\n ERRO \n");
 				break;
 			case 2:
