@@ -10,6 +10,10 @@ typedef struct tipo_cliente
 	char usuario[20];
 	char senha[5];
 	float saldo;
+	float retirado;
+	int contRET;
+	float inserido;
+	int contINS;
 	}cliente;
 int criar_conta ()
 {
@@ -17,6 +21,10 @@ int criar_conta ()
 	int y = 0;
 	cliente cli;
 	cli.saldo = 0;
+	cli.retirado = 0;
+	cli.inserido = 0;
+	cli.contINS = 0;
+	cli.contRET = 0;
 	printf("\n SIGA AS INSTRUÇOES \n");
 	printf("\n DIGITE SEU NOME : \n");
 	scanf("%s", cli.nome);
@@ -77,21 +85,21 @@ int mostrar_conta()
 int mostrar_saldo()
 {
 	FILE * arq;
-	cliente cli;
+	cliente cla;
 	char usi[20];
 	printf("\n BEM VINDO AO MINIBANC \n");
 	printf("\n DIGITE O SEU USUARIO : \n");
 	scanf("%s", usi);
 	arq = fopen(usi,"rb");
-	fread(&cli,sizeof(cliente),1,arq);
-	printf("\n %s : O SEU SALDO E DE : %lf REAIS \n", cli.usuario, cli.saldo);
+	fread(&cla,sizeof(cliente),1,arq);
+	printf("\n  %s : O SEU SALDO E DE : %lf REAIS \n", cla.usuario, cla.saldo);
 	fclose(arq);
 	return 0;
 }
 int inserir_din()
 {
 	FILE * p;
-	cliente cli;
+	cliente cle;
 	float valor;
 	char u[20];
 	printf("\n BEM VINDO AO MINIBANC \n");
@@ -101,10 +109,14 @@ int inserir_din()
 	scanf("%f", &valor);
 	if(fopen(u,"rb") != 0)//SE FOSSE W DIRETO ELE IRIA CRIAR UM DO ZERO
 	{
+		p = fopen(u,"rb");
+		fread(&cle,sizeof(cliente),1,p);
+		cle.saldo = cle.saldo + valor;
+		cle.inserido = cle.inserido + valor;		
+		cle.contINS++;
+		fclose(p);
 		p = fopen(u,"wb");
-		fread(&cli,sizeof(cliente),1,p);
-		cli.saldo = cli.saldo + valor;
-		fwrite(&cli,sizeof(cliente),1,p);
+		fwrite(&cle,sizeof(cliente),1,p);
 		fclose(p);	
 	}
 	return 0;
@@ -112,7 +124,7 @@ int inserir_din()
 int retirar_din()
 {
 	FILE * p;
-	cliente cli;
+	cliente clo;
 	float valor;
 	char u[20];
 	printf("\n BEM VINDO AO MINIBANC \n");
@@ -122,17 +134,45 @@ int retirar_din()
 	scanf("%f", &valor);
 	if(fopen(u,"rb") != 0) //SE FOSSE W DIRETO ELE IRIA CRIAR UM DO ZERO
 	{
-		p = fopen(u,"wb");
-		fread(&cli,sizeof(cliente),1,p);
-		cli.saldo = cli.saldo - valor;
-		if(cli.saldo < 0)
+		p = fopen(u,"rb");
+		fread(&clo,sizeof(cliente),1,p);
+		clo.saldo = clo.saldo - valor;
+		clo.retirado = clo.retirado + valor;
+		clo.contRET++;
+		fclose(p);
+		if(clo.saldo < 0)
 		{
 			printf("\n ESSA TRANSAÇÃO NÃO PODE SER EFETUADA \n");
 			return 0;
 		}
-		fwrite(&cli,sizeof(cliente),1,p);
-		fclose(p);	
-	}	
+		else
+		{
+			p = fopen(u,"wb");
+			fwrite(&clo,sizeof(cliente),1,p);
+			fclose(p);	
+		}	
+	}
+	return 0;
+}
+int extrato()
+{
+	FILE * A;
+	char u[20];
+	cliente cli;
+	printf("\n DIGITE SEU USUARIO \n");
+	scanf("%s",u);
+	if(fopen(u,"rb") != 0)
+	{
+		A = fopen(u,"rb");
+		fread(&cli,sizeof(cliente),1,A);
+		fclose(A);
+		printf("\n RETIRADO O TOTAL DE : %.2f EM %d VEZES \n", cli.retirado, cli.contRET);
+		printf("\n INSERIDO O TOTAL DE : %.2f EM %d VEZES \n", cli.inserido, cli.contINS);
+	}
+	else
+	{
+		printf("\n CONTA NÃO ENCONTRADA \n");
+	}
 	return 0;
 }
 int remove_conta()

@@ -31,6 +31,9 @@ int main ()
 			case 5:
 				K = retirar_din();
 				break;
+			case 6:
+				K = extrato();
+				break;
 			case 7:
 				K = remove_conta();
 				break;
