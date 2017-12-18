@@ -70,16 +70,36 @@ int criar_conta ()
 }
 int mostrar_conta()
 {
-	char us[20];
+	char us[20], senha[5];
+	int i = 0;
 	FILE * op;
 	cliente k;
 	printf("\n BEM VINDO AO MINIBANC \n");
-	printf("\n DIGITE O SEU USUARIO : \n");
+	printf("\n DIGITE O SEU USUARIO : \n\n");
 	scanf("%s", us);
 	op = fopen(us,"rb");
+	if(op == NULL)
+	{
+		printf("\n CONTA NAO ENCONTRADA \n");
+		return 0;
+	}
 	fread(&k,sizeof(cliente),1,op);
-	printf("\n NOME : %s \n IDADE: %d \n RG: %s \n CPF: %s \n", k.nome,k.idade,k.RG,k.CPF); 
 	fclose(op);
+	printf("\n TOTAL DE 3 TENTATIVAS");
+	while(i != 3)
+	{
+		printf("\n DIGITE SUA SENHA (%d TENTATIVA) \n",(i+1));
+		scanf("%s", senha);
+		if(strcmp(senha,k.senha) == 0)
+		{
+			printf("\n NOME : %s \n IDADE: %d \n RG: %s \n CPF: %s \n", k.nome,k.idade,k.RG,k.CPF); 
+			return 0;
+		}
+		i++;		
+	}
+	if(i == 3)
+			printf("\n TENTATIVAS TOTAIS ALCANCADAS, TENTE DEPOIS \n");
+
 	return 0;
 }
 int mostrar_saldo()
@@ -87,13 +107,33 @@ int mostrar_saldo()
 	FILE * arq;
 	cliente cla;
 	char usi[20];
+	char senha[5];
+	int i = 0;
 	printf("\n BEM VINDO AO MINIBANC \n");
 	printf("\n DIGITE O SEU USUARIO : \n");
 	scanf("%s", usi);
-	arq = fopen(usi,"rb");
-	fread(&cla,sizeof(cliente),1,arq);
-	printf("\n  %s : O SEU SALDO E DE : %lf REAIS \n", cla.usuario, cla.saldo);
-	fclose(arq);
+	if(fopen(usi,"rb") != 0)
+	{
+		arq = fopen(usi,"rb");
+		fread(&cla,sizeof(cliente),1,arq);
+		fclose(arq);
+		printf("\n TOTAL DE 3 TENTATIVAS");
+		while(i != 3)
+		{
+			printf("\n DIGITE SUA SENHA (%d TENTATIVA) \n",(i+1));
+			scanf("%s",senha);
+			if(strcmp(senha,cla.senha) == 0)
+			{
+				printf("\n  %s : O SEU SALDO E DE : %.2f REAIS \n", cla.usuario, cla.saldo);
+				return 0;
+			}		
+			i++;	
+		}
+		if(i == 3)
+			printf("\n TENTATIVAS TOTAIS ALCANCADAS, TENTE DEPOIS \n");
+	}
+	else
+		printf("\n CONTA NAO ENCONTRADA \n");	
 	return 0;
 }
 int inserir_din()
@@ -101,24 +141,40 @@ int inserir_din()
 	FILE * p;
 	cliente cle;
 	float valor;
-	char u[20];
+	char u[20],senha[5];
+	int i = 0;
 	printf("\n BEM VINDO AO MINIBANC \n");
 	printf("\n DIGITE O SEU USUARIO : \n");
 	scanf("%s", u);
-	printf("\n DIGITE O VALOR A SER DEPOSITADO: \n");
-	scanf("%f", &valor);
 	if(fopen(u,"rb") != 0)//SE FOSSE W DIRETO ELE IRIA CRIAR UM DO ZERO
 	{
 		p = fopen(u,"rb");
 		fread(&cle,sizeof(cliente),1,p);
-		cle.saldo = cle.saldo + valor;
-		cle.inserido = cle.inserido + valor;		
-		cle.contINS++;
 		fclose(p);
-		p = fopen(u,"wb");
-		fwrite(&cle,sizeof(cliente),1,p);
-		fclose(p);	
+		printf("\n TOTAL DE 3 TENTATIVAS");
+		while(i != 3)
+		{
+			printf("\n DIGITE SUA SENHA (%d TENTATIVA) \n",(i+1));
+			scanf("%s",senha);
+			if(strcmp(senha,cle.senha) == 0)
+			{
+				printf("\n DIGITE O VALOR A SER DEPOSITADO: \n");
+				scanf("%f", &valor);
+				cle.saldo = cle.saldo + valor;
+				cle.inserido = cle.inserido + valor;		
+				cle.contINS++;
+				p = fopen(u,"wb");
+				fwrite(&cle,sizeof(cliente),1,p);
+				fclose(p);
+				return 0;
+			}
+			i++;		
+		}
+		if(i == 3)
+			printf("\n TETATIVAS TOTAIS ALCANCADAS, DINHEIRO NAO DEPOSITADO \n");
 	}
+	else
+		printf("\n CONTA NAO ENCONTRADA \n");
 	return 0;
 }
 int retirar_din()
@@ -126,38 +182,55 @@ int retirar_din()
 	FILE * p;
 	cliente clo;
 	float valor;
-	char u[20];
+	char u[20], senha[5];
+	int i = 0;
 	printf("\n BEM VINDO AO MINIBANC \n");
 	printf("\n DIGITE O SEU USUARIO : \n");
 	scanf("%s", u);
-	printf("\n DIGITE O VALOR A SER DEPOSITADO: \n");
-	scanf("%f", &valor);
 	if(fopen(u,"rb") != 0) //SE FOSSE W DIRETO ELE IRIA CRIAR UM DO ZERO
 	{
 		p = fopen(u,"rb");
 		fread(&clo,sizeof(cliente),1,p);
-		clo.saldo = clo.saldo - valor;
-		clo.retirado = clo.retirado + valor;
-		clo.contRET++;
 		fclose(p);
-		if(clo.saldo < 0)
+		printf("\n TOTAL DE 3 TENTATIVAS");
+		while(i != 3)
 		{
-			printf("\n ESSA TRANSAÇÃO NÃO PODE SER EFETUADA \n");
-			return 0;
+			printf("\n DIGITE SUA SENHA (%d TENTATIVA) \n",(i+1));
+			scanf("%s",senha);
+			if(strcmp(senha,clo.senha) == 0)
+			{
+				printf("\n DIGITE O VALOR A SER RETIRADO: \n");
+				scanf("%f", &valor);
+				clo.saldo = clo.saldo - valor;
+				clo.retirado = clo.retirado + valor;
+				clo.contRET++;
+				if(clo.saldo < 0)
+				{
+					printf("\n ESSA TRANSAÇÃO NÃO PODE SER EFETUADA \n");
+					return 0;
+				}
+				else
+				{
+					p = fopen(u,"wb");
+					fwrite(&clo,sizeof(cliente),1,p);
+					fclose(p);
+					return 0;
+				}	
+			}	
+			i++;
 		}
-		else
-		{
-			p = fopen(u,"wb");
-			fwrite(&clo,sizeof(cliente),1,p);
-			fclose(p);	
-		}	
+		if(i == 3)
+			printf("\n TETATIVAS TOTAIS ALCANCADAS, DINHEIRO NAO RETIRADO \n");	
 	}
+	else
+		printf("\n CONTA NAO ENCONTRADA \n");
 	return 0;
 }
 int extrato()
 {
 	FILE * A;
-	char u[20];
+	char u[20],senha[5];
+	int i = 0;
 	cliente cli;
 	printf("\n DIGITE SEU USUARIO \n");
 	scanf("%s",u);
@@ -166,8 +239,21 @@ int extrato()
 		A = fopen(u,"rb");
 		fread(&cli,sizeof(cliente),1,A);
 		fclose(A);
-		printf("\n RETIRADO O TOTAL DE : %.2f EM %d VEZES \n", cli.retirado, cli.contRET);
-		printf("\n INSERIDO O TOTAL DE : %.2f EM %d VEZES \n", cli.inserido, cli.contINS);
+		printf("\n TOTAL DE 3 TENTATIVAS");
+		while(i != 3)
+		{
+			printf("\n DIGITE SUA SENHA (%d TENTATIVA)\n",(i+1));
+			scanf("%s", senha);
+			if(strcmp(senha,cli.senha) == 0)
+			{			
+				printf("\n RETIRADO O TOTAL DE : %.2f EM %d VEZES \n", cli.retirado, cli.contRET);
+				printf("\n INSERIDO O TOTAL DE : %.2f EM %d VEZES \n", cli.inserido, cli.contINS);
+				return 0;
+			}
+			i++;
+		}
+		if(i == 3)
+			printf("\n TETATIVAS TOTAIS ALCANCADAS, TENTE DEPOIS\n");
 	}
 	else
 	{
@@ -188,6 +274,7 @@ int remove_conta()
 		op = fopen(usi,"r");
 		fread(&L,sizeof(cliente),1,op);
 		fclose(op);
+		printf("\n TOTAL DE 3 TENTATIVAS");
 		while(i != 0)
 		{
 			printf("\n PARA DELETAR SUA CONTA, DIGITE A SENHA: (%d  TENTATIVAS) \n", i);
@@ -197,10 +284,15 @@ int remove_conta()
 				i = 0;
 				remove(usi);
 				printf("\n CONTA REMOVIDA \n");
+				return 0;
 			}
 			else
 				i--;
-		}	
+		}
+		if(i == 0)
+			printf("\n TETATIVAS TOTAIS ALCANCADAS, CONTA NAO REMOVIDA \n");
 	}
+	else
+		printf("\n CONTA NAO ENCONTRADA \n");
 	return 0;
 }
